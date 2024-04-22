@@ -37,6 +37,16 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final Product caixaProduto = Product(
+      'Caixa de Produtos',
+      'Fios de Cobre',
+      DateTime.now(),
+      [
+        ProductElement('Cobre', '011274755558', 10),
+        ProductElement('Borracha', '012345678901', 8),
+      ],
+    );
+
     return MaterialApp(
       title: 'Protótipo Flutter',
       theme: ThemeData(
@@ -54,16 +64,16 @@ class _MyAppState extends State<MyApp> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const InfoContainerWidget.withText('Produto: 001'),
-                      const InfoContainerWidget.withText(
-                          'Linha: Fios de Cobre'),
                       InfoContainerWidget.withText(
-                          'Data e Hora: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}'),
+                          'Produto: ${caixaProduto.nome}'),
+                      InfoContainerWidget.withText(
+                          'Linha: ${caixaProduto.linha}'),
+                      InfoContainerWidget.withText(
+                          'Data e Hora: ${DateFormat('dd/MM/yyyy HH:mm').format(caixaProduto.dataHora)}'),
                     ],
                   ),
                   const SizedBox(height: 20),
-                  _buildAttributeTable(),
-                  const SizedBox(height: 10),
+                  _buildElementTable(caixaProduto),
                   const SizedBox(height: 20),
                   Center(
                     child: LayoutBuilder(
@@ -99,49 +109,56 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  Widget _buildAttributeTable() {
-    return Row(
+  Widget _buildElementTable(Product produto) {
+    return Table(
+      columnWidths: const {
+        0: FlexColumnWidth(1),
+        1: FlexColumnWidth(1),
+      },
+      border: TableBorder.all(),
       children: [
-        Expanded(
-          child: Table(
-            columnWidths: const {
-              0: FlexColumnWidth(1),
-              1: FlexColumnWidth(1),
-            },
-            border: TableBorder.all(),
-            children: const [
-              TableRow(
-                decoration: BoxDecoration(color: Colors.black),
-                children: [
-                  TableCellWidget.withText('Estrutura'),
-                  TableCellWidget.withText('Quantidade'),
-                ],
-              ),
-              TableRow(
-                children: [
-                  TableCellWidget.withText('Cobre'),
-                  TableCellWidget.withText('10'),
-                ],
-              ),
-              TableRow(
-                children: [
-                  TableCellWidget.withText('Borracha'),
-                  TableCellWidget.withText('8'),
-                ],
-              ),
+        const TableRow(
+          decoration: BoxDecoration(color: Colors.grey),
+          children: [
+            TableCellWidget.withText('Nome'),
+            TableCellWidget.withText('Código de Barras'),
+            TableCellWidget.withText('Quantidade'),
+          ],
+        ),
+        for (final element in produto.elementos)
+          TableRow(
+            children: [
+              TableCellWidget.withText(element.elementName),
+              TableCellWidget.withText(element.codigoBarras),
+              TableCellWidget.withText(element.quantidade.toString()),
             ],
           ),
-        ),
-        const SizedBox(width: 10),
       ],
     );
   }
 }
 
+class Product {
+  final String nome;
+  final String linha;
+  final DateTime dataHora;
+  final List<ProductElement> elementos;
+
+  Product(this.nome, this.linha, this.dataHora, this.elementos);
+}
+
+class ProductElement {
+  final String elementName;
+  final String codigoBarras;
+  final int quantidade;
+
+  ProductElement(this.elementName, this.codigoBarras, this.quantidade);
+}
+
 class TableCellWidget extends StatelessWidget {
   final String text;
 
-  const TableCellWidget.withText(this.text, {super.key});
+  const TableCellWidget.withText(this.text, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +174,7 @@ class TableCellWidget extends StatelessWidget {
 class InfoContainerWidget extends StatelessWidget {
   final String text;
 
-  const InfoContainerWidget.withText(this.text, {super.key});
+  const InfoContainerWidget.withText(this.text, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
