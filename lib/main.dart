@@ -17,6 +17,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _scanBarcode = 'Unknown';
+  List<bool> _elementMatches = [];
 
   Future<void> scanBarcode() async {
     String barcodeScanRes;
@@ -24,6 +25,7 @@ class _MyAppState extends State<MyApp> {
       barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
           '#ff6666', 'Cancel', true, ScanMode.BARCODE);
       print(barcodeScanRes);
+      _checkBarcodeMatch(barcodeScanRes);
     } on PlatformException {
       barcodeScanRes = 'Failed to get platform version.';
     }
@@ -35,20 +37,28 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void _checkBarcodeMatch(String scannedBarcode) {
+    _elementMatches = List.generate(
+      _productElements.elements.length,
+          (index) => _productElements.elements[index].barcode == scannedBarcode,
+    );
+  }
+
+  final Product _productElements = Product(
+    'Caixa',
+    'Fios de Cobre',
+    DateTime.now(),
+    [
+      ProductElement('Cobre', '9780201379624', 10),
+      ProductElement('Borracha', '012345678901', 8),
+      ProductElement('Aço', '012345678901', 2),
+    ],
+  );
+
   @override
   Widget build(BuildContext context) {
-    final Product caixaProduto = Product(
-      'Caixa de Produtos',
-      'Fios de Cobre',
-      DateTime.now(),
-      [
-        ProductElement('Cobre', '011274755558', 10),
-        ProductElement('Borracha', '012345678901', 8),
-      ],
-    );
-
     return MaterialApp(
-      title: 'Protótipo Flutter',
+      title: 'Flutter Prototype',
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -65,15 +75,15 @@ class _MyAppState extends State<MyApp> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       InfoContainerWidget.withText(
-                          'Produto: ${caixaProduto.nome}'),
+                          'Produto: ${_productElements.name}'),
                       InfoContainerWidget.withText(
-                          'Linha: ${caixaProduto.linha}'),
+                          'Linha: ${_productElements.line}'),
                       InfoContainerWidget.withText(
-                          'Data e Hora: ${DateFormat('dd/MM/yyyy HH:mm').format(caixaProduto.dataHora)}'),
+                          'Data e Hora: ${DateFormat('dd/MM/yyyy HH:mm').format(_productElements.dateTime)}'),
                     ],
                   ),
                   const SizedBox(height: 20),
-                  _buildElementTable(caixaProduto),
+                  _buildElementTable(_productElements),
                   const SizedBox(height: 20),
                   Center(
                     child: LayoutBuilder(
@@ -84,22 +94,26 @@ class _MyAppState extends State<MyApp> {
                           width: halfScreenWidth,
                           height: halfScreenWidth,
                           decoration: BoxDecoration(
-                            color: Colors.red, // Fundo vermelho
-                            border: Border.all(),
+                            border: Border.all(color: Colors.black),
                           ),
                           child: CustomPaint(
-                            painter: _VerticalLinesPainter(
-                                2), // Ajuste o número de elementos conforme necessário
+                            painter: _SquarePainter(
+                              numberOfElements: _productElements.elements.length,
+                              elementMatches: _elementMatches,
+                            ),
                           ),
                         );
                       },
                     ),
                   ),
                   ElevatedButton(
-                      onPressed: () => scanBarcode(),
-                      child: const Text('Start barcode scan')),
-                  Text('Scan result : $_scanBarcode\n',
-                      style: const TextStyle(fontSize: 20))
+                    onPressed: () => scanBarcode(),
+                    child: const Text('Start barcode scan'),
+                  ),
+                  Text(
+                    'Scan result : $_scanBarcode\n',
+                    style: const TextStyle(fontSize: 20),
+                  )
                 ],
               ),
             ),
@@ -109,11 +123,12 @@ class _MyAppState extends State<MyApp> {
     );
   }
 
-  Widget _buildElementTable(Product produto) {
+  Widget _buildElementTable(Product product) {
     return Table(
       columnWidths: const {
         0: FlexColumnWidth(1),
         1: FlexColumnWidth(1),
+        2: FlexColumnWidth(1),
       },
       border: TableBorder.all(),
       children: [
@@ -121,16 +136,16 @@ class _MyAppState extends State<MyApp> {
           decoration: BoxDecoration(color: Colors.grey),
           children: [
             TableCellWidget.withText('Nome'),
-            TableCellWidget.withText('Código de Barras'),
+            TableCellWidget.withText('Código'),
             TableCellWidget.withText('Quantidade'),
           ],
         ),
-        for (final element in produto.elementos)
+        for (final element in product.elements)
           TableRow(
             children: [
-              TableCellWidget.withText(element.elementName),
-              TableCellWidget.withText(element.codigoBarras),
-              TableCellWidget.withText(element.quantidade.toString()),
+              TableCellWidget.withText(element.name),
+              TableCellWidget.withText(element.barcode),
+              TableCellWidget.withText(element.quantity.toString()),
             ],
           ),
       ],
@@ -139,20 +154,20 @@ class _MyAppState extends State<MyApp> {
 }
 
 class Product {
-  final String nome;
-  final String linha;
-  final DateTime dataHora;
-  final List<ProductElement> elementos;
+  final String name;
+  final String line;
+  final DateTime dateTime;
+  final List<ProductElement> elements;
 
-  Product(this.nome, this.linha, this.dataHora, this.elementos);
+  Product(this.name, this.line, this.dateTime, this.elements);
 }
 
 class ProductElement {
-  final String elementName;
-  final String codigoBarras;
-  final int quantidade;
+  final String name;
+  final String barcode;
+  final int quantity;
 
-  ProductElement(this.elementName, this.codigoBarras, this.quantidade);
+  ProductElement(this.name, this.barcode, this.quantity);
 }
 
 class TableCellWidget extends StatelessWidget {
@@ -192,24 +207,35 @@ class InfoContainerWidget extends StatelessWidget {
   }
 }
 
-class _VerticalLinesPainter extends CustomPainter {
+class _SquarePainter extends CustomPainter {
   final int numberOfElements;
+  final List<bool> elementMatches;
 
-  _VerticalLinesPainter(this.numberOfElements);
+  _SquarePainter({required this.numberOfElements, required this.elementMatches});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.black
-      ..strokeWidth = 2;
+    final paint = Paint()..strokeWidth = 2;
 
-    for (int i = 1; i < numberOfElements; i++) {
-      double x = i * size.width / numberOfElements;
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    double elementWidth = size.width / numberOfElements;
+    for (int i = 0; i < numberOfElements; i++) {
+      if (elementMatches.isNotEmpty && elementMatches[i]) {
+        paint.color = Colors.green;
+      } else {
+        paint.color = Colors.red;
+      }
+      double startX = i * elementWidth;
+      double startY = 0;
+      double endX = (i + 1) * elementWidth;
+      double endY = size.height;
+      canvas.drawRect(Rect.fromLTRB(startX, startY, endX, endY), paint);
+      paint.color = Colors.black;
+      canvas.drawLine(Offset(startX, startY), Offset(startX, endY), paint);
+      canvas.drawLine(Offset(endX, startY), Offset(endX, endY), paint);
     }
   }
 
   @override
-  bool shouldRepaint(_VerticalLinesPainter oldDelegate) =>
-      oldDelegate.numberOfElements != numberOfElements;
+  bool shouldRepaint(_SquarePainter oldDelegate) =>
+      oldDelegate.elementMatches != elementMatches;
 }
