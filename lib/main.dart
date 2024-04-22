@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-
 
 void main() {
   runApp(const MyApp());
@@ -15,16 +16,23 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  String _scanBarcode = 'Unknown';
 
-  Future<String> scanBarcode() async {
-    String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-      '#ff6666', // Cor do botão de cancelamento
-      'Cancelar', // Texto do botão de cancelamento
-      true, // Mostrar flash
-      ScanMode.BARCODE, // Modo de digitalização
-    );
+  Future<void> scanBarcode() async {
+    String barcodeScanRes;
+    try {
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+          '#ff6666', 'Cancel', true, ScanMode.BARCODE);
+      print(barcodeScanRes);
+    } on PlatformException {
+      barcodeScanRes = 'Failed to get platform version.';
+    }
 
-    return barcodeScanRes;
+    if (!mounted) return;
+
+    setState(() {
+      _scanBarcode = barcodeScanRes;
+    });
   }
 
   @override
@@ -39,51 +47,51 @@ class _MyAppState extends State<MyApp> {
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(10.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    InfoContainerWidget.withText('Produto: 001'),
-                    InfoContainerWidget.withText('Linha: Fios de Cobre'),
-                    InfoContainerWidget.withText(
-                        'Data e Hora: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}'),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                _buildAttributeTable(),
-                const SizedBox(height: 10),
-                const SizedBox(height: 20),
-                Center(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      double halfScreenWidth =
-                          MediaQuery.of(context).size.width / 6;
-                      return Container(
-                        width: halfScreenWidth,
-                        height: halfScreenWidth,
-                        decoration: BoxDecoration(
-                          color: Colors.red, // Fundo vermelho
-                          border: Border.all(),
-                        ),
-                        child: CustomPaint(
-                          painter: _VerticalLinesPainter(
-                              2), // Ajuste o número de elementos conforme necessário
-                        ),
-                      );
-                    },
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const InfoContainerWidget.withText('Produto: 001'),
+                      const InfoContainerWidget.withText(
+                          'Linha: Fios de Cobre'),
+                      InfoContainerWidget.withText(
+                          'Data e Hora: ${DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}'),
+                    ],
                   ),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    String barcodeScanRes = await scanBarcode();
-                    // Faça algo com o código de barras escaneado
-                    print('Código de barras escaneado: $barcodeScanRes');
-                  },
-                  child: Text('Escanear Código de Barras'),
-                ),
-              ],
+                  const SizedBox(height: 20),
+                  _buildAttributeTable(),
+                  const SizedBox(height: 10),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        double halfScreenWidth =
+                            MediaQuery.of(context).size.width / 6;
+                        return Container(
+                          width: halfScreenWidth,
+                          height: halfScreenWidth,
+                          decoration: BoxDecoration(
+                            color: Colors.red, // Fundo vermelho
+                            border: Border.all(),
+                          ),
+                          child: CustomPaint(
+                            painter: _VerticalLinesPainter(
+                                2), // Ajuste o número de elementos conforme necessário
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  ElevatedButton(
+                      onPressed: () => scanBarcode(),
+                      child: const Text('Start barcode scan')),
+                  Text('Scan result : $_scanBarcode\n',
+                      style: const TextStyle(fontSize: 20))
+                ],
+              ),
             ),
           ),
         ),
@@ -101,9 +109,9 @@ class _MyAppState extends State<MyApp> {
               1: FlexColumnWidth(1),
             },
             border: TableBorder.all(),
-            children: [
+            children: const [
               TableRow(
-                decoration: const BoxDecoration(color: Colors.black),
+                decoration: BoxDecoration(color: Colors.black),
                 children: [
                   TableCellWidget.withText('Estrutura'),
                   TableCellWidget.withText('Quantidade'),
@@ -133,13 +141,13 @@ class _MyAppState extends State<MyApp> {
 class TableCellWidget extends StatelessWidget {
   final String text;
 
-  TableCellWidget.withText(this.text);
+  const TableCellWidget.withText(this.text, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return TableCell(
       child: Padding(
-        padding: EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(8.0),
         child: Text(text),
       ),
     );
@@ -149,7 +157,7 @@ class TableCellWidget extends StatelessWidget {
 class InfoContainerWidget extends StatelessWidget {
   final String text;
 
-  InfoContainerWidget.withText(this.text);
+  const InfoContainerWidget.withText(this.text, {super.key});
 
   @override
   Widget build(BuildContext context) {
