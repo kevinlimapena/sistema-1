@@ -24,7 +24,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // Initializing the match status for each element with false
     _elementMatches = List.filled(_productElements.elements.length, false);
   }
 
@@ -52,6 +51,7 @@ class _MyAppState extends State<MyApp> {
         _elementMatches[i] = true;
       }
     }
+    setState(() {});
   }
 
   final Product _productElements = Product(
@@ -61,14 +61,18 @@ class _MyAppState extends State<MyApp> {
     [
       ProductElement('Cobre', '9780201379624', 10),
       ProductElement('Borracha', '858974669514', 8),
+      ProductElement('Borracha', '036000291452', 3),
     ],
   );
 
   @override
   Widget build(BuildContext context) {
+    bool allItemsScanned = !_elementMatches.contains(false);
+
     return MaterialApp(
       title: 'Flutter Prototype',
       theme: ThemeData(
+        brightness: Brightness.dark,
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
@@ -97,13 +101,11 @@ class _MyAppState extends State<MyApp> {
                   Center(
                     child: LayoutBuilder(
                       builder: (context, constraints) {
-                        double halfScreenWidth =
-                            MediaQuery.of(context).size.width / 6;
                         return Container(
-                          width: halfScreenWidth,
-                          height: halfScreenWidth,
+                          width: constraints.maxWidth / 2,
+                          height: constraints.maxWidth / 2,
                           decoration: BoxDecoration(
-                            border: Border.all(color: Colors.black),
+                            border: Border.all(color: Colors.blueAccent),
                           ),
                           child: CustomPaint(
                             painter: _SquarePainter(
@@ -119,10 +121,15 @@ class _MyAppState extends State<MyApp> {
                     onPressed: () => scanBarcode(),
                     child: const Text('Start barcode scan'),
                   ),
-                  Text(
-                    'Scan result : $_scanBarcode\n',
-                    style: const TextStyle(fontSize: 20),
-                  )
+                  Text('Scan result: $_scanBarcode', style: const TextStyle(fontSize: 20)),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: allItemsScanned ? () => print("Load next product") : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: allItemsScanned ? Colors.green : Colors.grey, disabledForegroundColor: Colors.grey.withOpacity(0.38), disabledBackgroundColor: Colors.grey.withOpacity(0.12), // Color for disabled state
+                    ),
+                    child: const Text('Load Next Product'),
+                  ),
                 ],
               ),
             ),
@@ -142,7 +149,7 @@ class _MyAppState extends State<MyApp> {
       border: TableBorder.all(),
       children: [
         const TableRow(
-          decoration: BoxDecoration(color: Colors.grey),
+          decoration: BoxDecoration(color: Colors.black),
           children: [
             TableCellWidget.withText('Nome'),
             TableCellWidget.withText('Código'),
@@ -204,7 +211,7 @@ class InfoContainerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[300],
+        color: Colors.black,
         border: Border.all(),
       ),
       padding: const EdgeInsets.all(8.0),
@@ -225,20 +232,13 @@ class _SquarePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..strokeWidth = 2;
-
     double elementWidth = size.width / numberOfElements;
-
     for (int i = 0; i < numberOfElements; i++) {
       paint.color = elementMatches[i] ? Colors.green : Colors.red;
-      double startX = i * elementWidth;
-      double startY = 0;
-      double endX = (i + 1) * elementWidth;
-      double endY = size.height;
-      canvas.drawRect(Rect.fromLTRB(startX, startY, endX, endY), paint);
+      canvas.drawRect(Rect.fromLTWH(i * elementWidth, 0, elementWidth, size.height), paint);
     }
   }
 
   @override
-  bool shouldRepaint(_SquarePainter oldDelegate) =>
-      oldDelegate.elementMatches != elementMatches;
+  bool shouldRepaint(_SquarePainter oldDelegate) => oldDelegate.elementMatches != elementMatches;
 }
