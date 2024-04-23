@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'dart:ui' as ui;
 
 void main() {
   runApp(const MyApp());
@@ -110,6 +111,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    const Color navyBlue = Color(0xFF003366); // Um tom de azul marinho
     bool allItemsScanned = !_elementMatches.contains(false);
 
     return MaterialApp(
@@ -117,8 +119,18 @@ class _MyAppState extends State<MyApp> {
       title: 'Flutter Prototype',
       theme: ThemeData(
         brightness: Brightness.dark,
-        primarySwatch: Colors.blue,
+        primaryColor: navyBlue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
+        buttonTheme: ButtonThemeData(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          buttonColor: navyBlue,
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.white, backgroundColor: navyBlue,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          ),
+        ),
       ),
       home: Scaffold(
         body: SafeArea(
@@ -154,8 +166,8 @@ class _MyAppState extends State<MyApp> {
                       ),
                       const SizedBox(width: 20),
                       Container(
-                        width: MediaQuery.of(context).size.width * 0.4,  // Adjust size as necessary
-                        height: MediaQuery.of(context).size.width * 0.4,  // Keep square aspect ratio
+                        width: MediaQuery.of(context).size.width * 0.2,
+                        height: MediaQuery.of(context).size.width * 0.2,
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.blueAccent),
                         ),
@@ -243,9 +255,16 @@ class TableCellWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TableCell(
-      child: Padding(
+      child: Container(
         padding: const EdgeInsets.all(8.0),
-        child: Text(text),
+        decoration: BoxDecoration(
+          color: Color(0xFF003366).withOpacity(0.6),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -260,13 +279,14 @@ class InfoContainerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.black,
-        border: Border.all(),
+        color: Color(0xFF003366),
+        border: Border.all(color: Colors.white),
+        borderRadius: BorderRadius.circular(10),
       ),
       padding: const EdgeInsets.all(8.0),
       child: Text(
         text,
-        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
       ),
     );
   }
