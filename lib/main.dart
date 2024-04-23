@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 void main() {
@@ -18,6 +18,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String _scanBarcode = 'Unknown';
   List<bool> _elementMatches;
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   _MyAppState() : _elementMatches = [];
 
@@ -63,12 +64,37 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _checkBarcodeMatch(String scannedBarcode) {
+    bool found = false;
     for (int i = 0; i < _productElements.elements.length; i++) {
       if (_productElements.elements[i].barcode == scannedBarcode) {
         _elementMatches[i] = true;
+        found = true;
+        break;
       }
     }
-    setState(() {});
+
+    if (!found) {
+      if (!navigatorKey.currentState!.mounted) return;
+      showDialog(
+        context: navigatorKey.currentState!.context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Barcode Not Found"),
+            content: Text("The scanned barcode ($scannedBarcode) does not match any product element."),
+            actions: <Widget>[
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text("OK")
+              )
+            ],
+          );
+        },
+      );
+    }
+
+    if (mounted) setState(() {});
   }
 
   final Product _productElements = Product(
@@ -87,6 +113,7 @@ class _MyAppState extends State<MyApp> {
     bool allItemsScanned = !_elementMatches.contains(false);
 
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'Flutter Prototype',
       theme: ThemeData(
         brightness: Brightness.dark,
@@ -145,7 +172,7 @@ class _MyAppState extends State<MyApp> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: allItemsScanned ? Colors.green : Colors.grey,
                           disabledForegroundColor: Colors.grey.withOpacity(0.38),
-                          disabledBackgroundColor: Colors.grey.withOpacity(0.12),  // Color for disabled state
+                          disabledBackgroundColor: Colors.grey.withOpacity(0.12),
                         ),
                         child: const Text('Load Next Product'),
                       ),
