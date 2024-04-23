@@ -17,7 +17,16 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _scanBarcode = 'Unknown';
-  List<bool> _elementMatches = [];
+  List<bool> _elementMatches;
+
+  _MyAppState() : _elementMatches = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // Initializing the match status for each element with false
+    _elementMatches = List.filled(_productElements.elements.length, false);
+  }
 
   Future<void> scanBarcode() async {
     String barcodeScanRes;
@@ -38,10 +47,11 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _checkBarcodeMatch(String scannedBarcode) {
-    _elementMatches = List.generate(
-      _productElements.elements.length,
-          (index) => _productElements.elements[index].barcode == scannedBarcode,
-    );
+    for (int i = 0; i < _productElements.elements.length; i++) {
+      if (_productElements.elements[i].barcode == scannedBarcode) {
+        _elementMatches[i] = true;
+      }
+    }
   }
 
   final Product _productElements = Product(
@@ -50,8 +60,7 @@ class _MyAppState extends State<MyApp> {
     DateTime.now(),
     [
       ProductElement('Cobre', '9780201379624', 10),
-      ProductElement('Borracha', '012345678901', 8),
-      ProductElement('Aço', '012345678901', 2),
+      ProductElement('Borracha', '858974669514', 8),
     ],
   );
 
@@ -218,20 +227,14 @@ class _SquarePainter extends CustomPainter {
     final paint = Paint()..strokeWidth = 2;
 
     double elementWidth = size.width / numberOfElements;
+
     for (int i = 0; i < numberOfElements; i++) {
-      if (elementMatches.isNotEmpty && elementMatches[i]) {
-        paint.color = Colors.green;
-      } else {
-        paint.color = Colors.red;
-      }
+      paint.color = elementMatches[i] ? Colors.green : Colors.red;
       double startX = i * elementWidth;
       double startY = 0;
       double endX = (i + 1) * elementWidth;
       double endY = size.height;
       canvas.drawRect(Rect.fromLTRB(startX, startY, endX, endY), paint);
-      paint.color = Colors.black;
-      canvas.drawLine(Offset(startX, startY), Offset(startX, endY), paint);
-      canvas.drawLine(Offset(endX, startY), Offset(endX, endY), paint);
     }
   }
 
