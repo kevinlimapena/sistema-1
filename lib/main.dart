@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
-import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
 void main() {
@@ -24,7 +24,24 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      SystemChrome.setPreferredOrientations([
+        DeviceOrientation.landscapeRight,
+        DeviceOrientation.landscapeLeft,
+      ]);
+    });
     _elementMatches = List.filled(_productElements.elements.length, false);
+  }
+
+  @override
+  void dispose() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+      DeviceOrientation.landscapeRight,
+      DeviceOrientation.landscapeLeft,
+    ]);
+    super.dispose();
   }
 
   Future<void> scanBarcode() async {
@@ -61,7 +78,7 @@ class _MyAppState extends State<MyApp> {
     [
       ProductElement('Cobre', '9780201379624', 10),
       ProductElement('Borracha', '858974669514', 8),
-      ProductElement('Borracha', '036000291452', 3),
+      ProductElement('Silicone', '036000291452', 3),
     ],
   );
 
@@ -87,49 +104,54 @@ class _MyAppState extends State<MyApp> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      InfoContainerWidget.withText(
-                          'Produto: ${_productElements.name}'),
-                      InfoContainerWidget.withText(
-                          'Linha: ${_productElements.line}'),
-                      InfoContainerWidget.withText(
-                          'Data e Hora: ${DateFormat('dd/MM/yyyy HH:mm').format(_productElements.dateTime)}'),
+                      InfoContainerWidget.withText('Produto: ${_productElements.name}'),
+                      InfoContainerWidget.withText('Linha: ${_productElements.line}'),
+                      InfoContainerWidget.withText('Data e Hora: ${DateFormat('dd/MM/yyyy HH:mm').format(_productElements.dateTime)}'),
                     ],
                   ),
                   const SizedBox(height: 20),
                   _buildElementTable(_productElements),
                   const SizedBox(height: 20),
-                  Center(
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        return Container(
-                          width: constraints.maxWidth / 2,
-                          height: constraints.maxWidth / 2,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.blueAccent),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Column(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () => scanBarcode(),
+                            child: const Text('Start barcode scan'),
                           ),
-                          child: CustomPaint(
-                            painter: _SquarePainter(
-                              numberOfElements: _productElements.elements.length,
-                              elementMatches: _elementMatches,
-                            ),
+                          const SizedBox(height: 10),
+                          Text('Scan result: $_scanBarcode', style: const TextStyle(fontSize: 16)),
+                        ],
+                      ),
+                      const SizedBox(width: 20),
+                      Container(
+                        width: MediaQuery.of(context).size.width * 0.4,  // Adjust size as necessary
+                        height: MediaQuery.of(context).size.width * 0.4,  // Keep square aspect ratio
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.blueAccent),
+                        ),
+                        child: CustomPaint(
+                          painter: _SquarePainter(
+                            numberOfElements: _productElements.elements.length,
+                            elementMatches: _elementMatches,
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      ),
+                      const SizedBox(width: 20),
+                      ElevatedButton(
+                        onPressed: allItemsScanned ? () => print("Load next product") : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: allItemsScanned ? Colors.green : Colors.grey,
+                          disabledForegroundColor: Colors.grey.withOpacity(0.38),
+                          disabledBackgroundColor: Colors.grey.withOpacity(0.12),  // Color for disabled state
+                        ),
+                        child: const Text('Load Next Product'),
+                      ),
+                    ],
                   ),
-                  ElevatedButton(
-                    onPressed: () => scanBarcode(),
-                    child: const Text('Start barcode scan'),
-                  ),
-                  Text('Scan result: $_scanBarcode', style: const TextStyle(fontSize: 20)),
                   const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: allItemsScanned ? () => print("Load next product") : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: allItemsScanned ? Colors.green : Colors.grey, disabledForegroundColor: Colors.grey.withOpacity(0.38), disabledBackgroundColor: Colors.grey.withOpacity(0.12), // Color for disabled state
-                    ),
-                    child: const Text('Load Next Product'),
-                  ),
                 ],
               ),
             ),
