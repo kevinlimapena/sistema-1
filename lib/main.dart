@@ -61,7 +61,8 @@ class _MyAppState extends State<MyApp> {
   Future<void> scanBarcode() async {
     String barcodeScanRes;
     try {
-      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode('#ff6666', 'Cancel', true, ScanMode.BARCODE);
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+          '#ff6666', 'Cancel', true, ScanMode.BARCODE);
       print("BARCODE: ($barcodeScanRes)");
       _checkBarcodeMatch(barcodeScanRes);
     } on PlatformException {
@@ -78,7 +79,8 @@ class _MyAppState extends State<MyApp> {
   void _checkBarcodeMatch(String scannedBarcode) {
     bool found = false;
     for (int i = 0; i < _productElements.elements.length; i++) {
-      if (_productElements.elements[i].barcode == scannedBarcode && !_elementMatches[i]) {
+      if (_productElements.elements[i].barcode == scannedBarcode &&
+          !_elementMatches[i]) {
         _elementMatches[i] = true;
         found = true;
       }
@@ -91,12 +93,12 @@ class _MyAppState extends State<MyApp> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text("Barcode não encontrado"),
-            content: Text("O barcode: ($scannedBarcode) não pertence a nenhum item."),
+            content: Text(
+                "O barcode: ($scannedBarcode) não pertence a nenhum item."),
             actions: <Widget>[
               TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text("OK")
-              )
+                  child: const Text("OK"))
             ],
           );
         },
@@ -108,7 +110,6 @@ class _MyAppState extends State<MyApp> {
       });
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -122,13 +123,16 @@ class _MyAppState extends State<MyApp> {
         primaryColor: navyBlue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
         buttonTheme: ButtonThemeData(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           buttonColor: navyBlue,
         ),
         textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
-            foregroundColor: Colors.white, backgroundColor: navyBlue,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            foregroundColor: Colors.white,
+            backgroundColor: navyBlue,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           ),
         ),
       ),
@@ -143,10 +147,15 @@ class _MyAppState extends State<MyApp> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      InfoContainerWidget.withText('Caixas Fechadas: $boxesRead',),
-                      InfoContainerWidget.withText('Produto: ${_productElements.name}'),
-                      InfoContainerWidget.withText('Linha: ${_productElements.line}'),
-                      InfoContainerWidget.withText('Data e Hora: ${DateFormat('dd/MM/yyyy HH:mm').format(_productElements.dateTime)}'),
+                      InfoContainerWidget.withText(
+                        'Caixas Fechadas: $boxesRead',
+                      ),
+                      InfoContainerWidget.withText(
+                          'Produto: ${_productElements.name}'),
+                      InfoContainerWidget.withText(
+                          'Linha: ${_productElements.line}'),
+                      InfoContainerWidget.withText(
+                          'Data e Hora: ${DateFormat('dd/MM/yyyy HH:mm').format(_productElements.dateTime)}'),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -159,21 +168,26 @@ class _MyAppState extends State<MyApp> {
                         children: [
                           ElevatedButton(
                             onPressed: () => scanBarcode(),
-                            child: const Text('Escanear Item', style: TextStyle(fontSize: 16, color: Colors.white)),
+                            child: const Text('Escanear Item',
+                                style: TextStyle(
+                                    fontSize: 16, color: Colors.white)),
                           ),
                           const SizedBox(height: 10),
-                          Text('Produto escaneado: $_scanBarcode', style: const TextStyle(fontSize: 16)),
+                          Text('Produto escaneado: $_scanBarcode',
+                              style: const TextStyle(fontSize: 16)),
                           if (showCompleteMessage)
                             ElevatedButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _elementMatches = List.filled(_productElements.elements.length, false);
-                                    showCompleteMessage = false;
-                                  });
-                                },
-                                child: const  BlinkingText('Fechar Caixa', ),
+                              onPressed: () {
+                                setState(() {
+                                  _elementMatches = List.filled(
+                                      _productElements.elements.length, false);
+                                  showCompleteMessage = false;
+                                });
+                              },
+                              child: const BlinkingText(
+                                'Fechar Caixa',
+                              ),
                             ),
-
                         ],
                       ),
                       const SizedBox(width: 20),
@@ -209,6 +223,7 @@ class _MyAppState extends State<MyApp> {
         0: FlexColumnWidth(1),
         1: FlexColumnWidth(1),
         2: FlexColumnWidth(1),
+        3: FlexColumnWidth(1), // Espaço para a coluna de checklist
       },
       border: TableBorder.all(),
       children: [
@@ -218,16 +233,32 @@ class _MyAppState extends State<MyApp> {
             TableCellWidget.withText('Nome'),
             TableCellWidget.withText('Código'),
             TableCellWidget.withText('Quantidade'),
+            TableCellWidget.withText('Escaneado'),
           ],
         ),
-        for (final element in product.elements)
-          TableRow(
+        ...product.elements.map((element) {
+          int index = product.elements.indexOf(element);
+          return TableRow(
             children: [
               TableCellWidget.withText(element.name),
               TableCellWidget.withText(element.barcode),
               TableCellWidget.withText(element.quantity.toString()),
+              Container(
+                padding: const EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF003366).withOpacity(0.6),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  _elementMatches[index]
+                      ? Icons.check_box
+                      : Icons.check_box_outline_blank,
+                  color: _elementMatches[index] ? Colors.green : Colors.grey,
+                ),
+              )
             ],
-          ),
+          );
+        }).toList(),
       ],
     );
   }
@@ -259,14 +290,15 @@ class TableCellWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return TableCell(
       child: Container(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(10.0),
         decoration: BoxDecoration(
           color: const Color(0xFF003366).withOpacity(0.6),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
           text,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style:
+              const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
     );
@@ -289,7 +321,8 @@ class InfoContainerWidget extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       child: Text(
         text,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+        style: const TextStyle(
+            fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
       ),
     );
   }
@@ -304,13 +337,16 @@ class BlinkingText extends StatefulWidget {
   BlinkingTextState createState() => BlinkingTextState();
 }
 
-class BlinkingTextState extends State<BlinkingText> with SingleTickerProviderStateMixin {
+class BlinkingTextState extends State<BlinkingText>
+    with SingleTickerProviderStateMixin {
   AnimationController? _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 1))..repeat(reverse: true);
+    _controller =
+        AnimationController(vsync: this, duration: const Duration(seconds: 1))
+          ..repeat(reverse: true);
   }
 
   @override
@@ -323,7 +359,9 @@ class BlinkingTextState extends State<BlinkingText> with SingleTickerProviderSta
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _controller!,
-      child: Text(widget.text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue)),
+      child: Text(widget.text,
+          style: const TextStyle(
+              fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue)),
     );
   }
 }
@@ -332,7 +370,8 @@ class _SquarePainter extends CustomPainter {
   final int numberOfElements;
   final List<bool> elementMatches;
 
-  _SquarePainter({required this.numberOfElements, required this.elementMatches});
+  _SquarePainter(
+      {required this.numberOfElements, required this.elementMatches});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -340,10 +379,12 @@ class _SquarePainter extends CustomPainter {
     double elementWidth = size.width / numberOfElements;
     for (int i = 0; i < numberOfElements; i++) {
       paint.color = elementMatches[i] ? Colors.green : Colors.red;
-      canvas.drawRect(Rect.fromLTWH(i * elementWidth, 0, elementWidth, size.height), paint);
+      canvas.drawRect(
+          Rect.fromLTWH(i * elementWidth, 0, elementWidth, size.height), paint);
     }
   }
 
   @override
-  bool shouldRepaint(_SquarePainter oldDelegate) => oldDelegate.elementMatches != elementMatches;
+  bool shouldRepaint(_SquarePainter oldDelegate) =>
+      oldDelegate.elementMatches != elementMatches;
 }
