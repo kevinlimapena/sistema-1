@@ -5,23 +5,34 @@ void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Sistema',
+      title: 'Sistema de validação de caixas',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        brightness: Brightness.dark,
+        primaryColor: const Color(0xFF003366),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF003366),
+          foregroundColor: Colors.white,
+        ),
+        buttonTheme: ButtonThemeData(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          buttonColor: const Color(0xFF003366),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.white,
+            backgroundColor: const Color(0xFF003366),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          ),
+        ),
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MainScreen(),
+      home: const MainScreen(),
     );
   }
 }
