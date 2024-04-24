@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import 'dart:ui' as ui;
 
 void main() {
   runApp(const MyApp());
@@ -20,8 +19,21 @@ class _MyAppState extends State<MyApp> {
   String _scanBarcode = 'Unknown';
   List<bool> _elementMatches;
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  int boxesRead = 0;
+  bool showCompleteMessage = false;
 
   _MyAppState() : _elementMatches = [];
+
+  final Product _productElements = Product(
+    'Caixa',
+    'Fios de Cobre',
+    DateTime.now(),
+    [
+      ProductElement('Cobre', '9780201379624', 10),
+      ProductElement('Borracha', '858974669514', 8),
+      ProductElement('Silicone', '036000291452', 3),
+    ],
+  );
 
   @override
   void initState() {
@@ -49,9 +61,8 @@ class _MyAppState extends State<MyApp> {
   Future<void> scanBarcode() async {
     String barcodeScanRes;
     try {
-      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-          '#ff6666', 'Cancel', true, ScanMode.BARCODE);
-      print(barcodeScanRes);
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode('#ff6666', 'Cancel', true, ScanMode.BARCODE);
+      print("BARCODE: ($barcodeScanRes)");
       _checkBarcodeMatch(barcodeScanRes);
     } on PlatformException {
       barcodeScanRes = 'Failed to get platform version.';
@@ -67,10 +78,9 @@ class _MyAppState extends State<MyApp> {
   void _checkBarcodeMatch(String scannedBarcode) {
     bool found = false;
     for (int i = 0; i < _productElements.elements.length; i++) {
-      if (_productElements.elements[i].barcode == scannedBarcode) {
+      if (_productElements.elements[i].barcode == scannedBarcode && !_elementMatches[i]) {
         _elementMatches[i] = true;
         found = true;
-        break;
       }
     }
 
@@ -80,39 +90,29 @@ class _MyAppState extends State<MyApp> {
         context: navigatorKey.currentState!.context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text("Barcode Not Found"),
-            content: Text("The scanned barcode ($scannedBarcode) does not match any product element."),
+            title: const Text("Barcode não encontrado"),
+            content: Text("O barcode: ($scannedBarcode) não pertence a nenhum item."),
             actions: <Widget>[
               TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
+                  onPressed: () => Navigator.of(context).pop(),
                   child: const Text("OK")
               )
             ],
           );
         },
       );
+    } else if (_elementMatches.every((element) => element)) {
+      setState(() {
+        showCompleteMessage = true;
+        boxesRead++;
+      });
     }
-
-    if (mounted) setState(() {});
   }
 
-  final Product _productElements = Product(
-    'Caixa',
-    'Fios de Cobre',
-    DateTime.now(),
-    [
-      ProductElement('Cobre', '9780201379624', 10),
-      ProductElement('Borracha', '858974669514', 8),
-      ProductElement('Silicone', '036000291452', 3),
-    ],
-  );
 
   @override
   Widget build(BuildContext context) {
-    const Color navyBlue = Color(0xFF003366); // Um tom de azul marinho
-    bool allItemsScanned = !_elementMatches.contains(false);
+    const Color navyBlue = Color(0xFF003366);
 
     return MaterialApp(
       navigatorKey: navigatorKey,
@@ -143,6 +143,7 @@ class _MyAppState extends State<MyApp> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      InfoContainerWidget.withText('Caixas Fechadas: $boxesRead',),
                       InfoContainerWidget.withText('Produto: ${_productElements.name}'),
                       InfoContainerWidget.withText('Linha: ${_productElements.line}'),
                       InfoContainerWidget.withText('Data e Hora: ${DateFormat('dd/MM/yyyy HH:mm').format(_productElements.dateTime)}'),
@@ -158,18 +159,29 @@ class _MyAppState extends State<MyApp> {
                         children: [
                           ElevatedButton(
                             onPressed: () => scanBarcode(),
-                            child: const Text('Start barcode scan'),
+                            child: const Text('Escanear Item', style: TextStyle(fontSize: 16, color: Colors.white)),
                           ),
                           const SizedBox(height: 10),
-                          Text('Scan result: $_scanBarcode', style: const TextStyle(fontSize: 16)),
+                          Text('Produto escaneado: $_scanBarcode', style: const TextStyle(fontSize: 16)),
+                          if (showCompleteMessage)
+                            ElevatedButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _elementMatches = List.filled(_productElements.elements.length, false);
+                                    showCompleteMessage = false;
+                                  });
+                                },
+                                child: const  BlinkingText('Fechar Caixa', ),
+                            ),
+
                         ],
                       ),
                       const SizedBox(width: 20),
                       Container(
-                        width: MediaQuery.of(context).size.width * 0.2,
-                        height: MediaQuery.of(context).size.width * 0.2,
+                        width: MediaQuery.of(context).size.width * 0.17,
+                        height: MediaQuery.of(context).size.width * 0.17,
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.blueAccent),
+                          border: Border.all(color: Colors.black),
                         ),
                         child: CustomPaint(
                           painter: _SquarePainter(
@@ -179,15 +191,6 @@ class _MyAppState extends State<MyApp> {
                         ),
                       ),
                       const SizedBox(width: 20),
-                      ElevatedButton(
-                        onPressed: allItemsScanned ? () => print("Load next product") : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: allItemsScanned ? Colors.green : Colors.grey,
-                          disabledForegroundColor: Colors.grey.withOpacity(0.38),
-                          disabledBackgroundColor: Colors.grey.withOpacity(0.12),
-                        ),
-                        child: const Text('Load Next Product'),
-                      ),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -258,12 +261,12 @@ class TableCellWidget extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(
-          color: Color(0xFF003366).withOpacity(0.6),
+          color: const Color(0xFF003366).withOpacity(0.6),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
           text,
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
     );
@@ -279,15 +282,48 @@ class InfoContainerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Color(0xFF003366),
+        color: const Color(0xFF003366),
         border: Border.all(color: Colors.white),
         borderRadius: BorderRadius.circular(10),
       ),
       padding: const EdgeInsets.all(8.0),
       child: Text(
         text,
-        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
       ),
+    );
+  }
+}
+
+class BlinkingText extends StatefulWidget {
+  final String text;
+
+  const BlinkingText(this.text, {Key? key}) : super(key: key);
+
+  @override
+  BlinkingTextState createState() => BlinkingTextState();
+}
+
+class BlinkingTextState extends State<BlinkingText> with SingleTickerProviderStateMixin {
+  AnimationController? _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: const Duration(seconds: 1))..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _controller!,
+      child: Text(widget.text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue)),
     );
   }
 }
