@@ -5,14 +5,16 @@ class ProductRegistrationScreen extends StatefulWidget {
   const ProductRegistrationScreen({Key? key}) : super(key: key);
 
   @override
-  ProductRegistrationScreenState createState() => ProductRegistrationScreenState();
+  ProductRegistrationScreenState createState() =>
+      ProductRegistrationScreenState();
 }
 
 class ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _elementNameController = TextEditingController();
-  final TextEditingController _quantityController = TextEditingController(text: '1');
+  final TextEditingController _quantityController =
+      TextEditingController(text: '1');
   List<ProductElement> elements = [];
   String _scannedBarcode = 'Nenhum código escaneado';
   String? _selectedLine = 'Eletrônicos';
@@ -104,7 +106,8 @@ class ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                         if (value == null || value.isEmpty) {
                           return 'Por favor, insira a quantidade';
                         }
-                        if (int.tryParse(value) == null || int.parse(value) < 1) {
+                        if (int.tryParse(value) == null ||
+                            int.parse(value) < 1) {
                           return 'Por favor, insira um número válido';
                         }
                         return null;
@@ -118,7 +121,8 @@ class ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                       int currentValue = int.parse(_quantityController.text);
                       if (currentValue > 1) {
                         setState(() {
-                          _quantityController.text = (currentValue - 1).toString();
+                          _quantityController.text =
+                              (currentValue - 1).toString();
                         });
                       }
                     },
@@ -128,7 +132,8 @@ class ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                     onPressed: () {
                       int currentValue = int.parse(_quantityController.text);
                       setState(() {
-                        _quantityController.text = (currentValue + 1).toString();
+                        _quantityController.text =
+                            (currentValue + 1).toString();
                       });
                     },
                   ),
@@ -144,9 +149,13 @@ class ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
               const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: () {
-                  if (_formKey.currentState!.validate() && _scannedBarcode != 'Nenhum código escaneado') {
+                  if (_formKey.currentState!.validate() &&
+                      _scannedBarcode != 'Nenhum código escaneado') {
                     setState(() {
-                      elements.add(ProductElement(_elementNameController.text, _scannedBarcode, int.parse(_quantityController.text)));
+                      elements.add(ProductElement(
+                          _elementNameController.text,
+                          _scannedBarcode,
+                          int.parse(_quantityController.text)));
                       _elementNameController.clear();
                       _quantityController.text = '1'; // Reset to default
                       _scannedBarcode = 'Nenhum código escaneado';
@@ -156,12 +165,14 @@ class ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                 child: const Text('Adicionar Item'),
               ),
               const SizedBox(height: 20),
-              Text('Itens Adicionados:', style: Theme.of(context).textTheme.titleMedium),
+              Text('Itens Adicionados:',
+                  style: Theme.of(context).textTheme.titleMedium),
               for (ProductElement element in elements)
                 Card(
                   child: ListTile(
                     title: Text(element.name),
-                    subtitle: Text('Código: ${element.barcode}, Quantidade: ${element.quantity}'),
+                    subtitle: Text(
+                        'Código: ${element.barcode}, Quantidade: ${element.quantity}'),
                   ),
                 ),
               const SizedBox(height: 20),
@@ -180,11 +191,13 @@ class ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
   }
 
   Future<void> scanBarcode() async {
-    String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode('#ff6666', 'Cancel', true, ScanMode.BARCODE);
+    String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+        '#ff6666', 'Cancel', true, ScanMode.BARCODE);
     if (!mounted) return;
 
     setState(() {
-      _scannedBarcode = barcodeScanRes != '-1' ? barcodeScanRes : 'Nenhum código escaneado';
+      _scannedBarcode =
+          barcodeScanRes != '-1' ? barcodeScanRes : 'Nenhum código escaneado';
     });
   }
 }

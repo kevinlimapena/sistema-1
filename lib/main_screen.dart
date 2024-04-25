@@ -18,14 +18,16 @@ class MainScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const ProductRegistrationScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const ProductRegistrationScreen()),
               ),
               child: const Text('Cadastro de Produto'),
             ),
             ElevatedButton(
               onPressed: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const ProductScanScreen()),
+                MaterialPageRoute(
+                    builder: (context) => const ProductScanScreen()),
               ),
               child: const Text('Escanear Produto'),
             ),

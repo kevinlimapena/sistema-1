@@ -5,7 +5,6 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
-
 class ProductScanScreen extends StatefulWidget {
   const ProductScanScreen({Key? key}) : super(key: key);
 
@@ -91,7 +90,6 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
     } else if (_elementMatches.every((element) => element)) {
       setState(() {
         showCompleteMessage = true;
-
       });
     }
   }
@@ -109,7 +107,7 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
         visualDensity: VisualDensity.adaptivePlatformDensity,
         buttonTheme: ButtonThemeData(
           shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           buttonColor: navyBlue,
         ),
         textButtonTheme: TextButtonThemeData(
@@ -117,7 +115,7 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
             foregroundColor: Colors.white,
             backgroundColor: navyBlue,
             shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           ),
         ),
       ),
@@ -191,8 +189,7 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
                           painter: _SquarePainter(
                             numberOfElements: _productElements.elements.length,
                             elementMatches: _elementMatches,
-                            elements: _productElements
-                                .elements,
+                            elements: _productElements.elements,
                           ),
                         ),
                       ),
@@ -290,7 +287,7 @@ class TableCellWidget extends StatelessWidget {
         child: Text(
           text,
           style:
-          const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
     );
@@ -337,8 +334,8 @@ class BlinkingTextState extends State<BlinkingText>
   void initState() {
     super.initState();
     _controller =
-    AnimationController(vsync: this, duration: const Duration(seconds: 1))
-      ..repeat(reverse: true);
+        AnimationController(vsync: this, duration: const Duration(seconds: 1))
+          ..repeat(reverse: true);
   }
 
   @override
@@ -377,7 +374,8 @@ class _SquarePainter extends CustomPainter {
 
     for (int i = 0; i < numberOfElements; i++) {
       paint.color = elementMatches[i] ? Colors.green : Colors.red;
-      final rect = Rect.fromLTWH(i * elementWidth, 0, elementWidth, size.height);
+      final rect =
+          Rect.fromLTWH(i * elementWidth, 0, elementWidth, size.height);
       canvas.drawRect(rect, paint);
 
       // Criar TextPainter para cada iteração para garantir que textDirection seja definido
@@ -408,4 +406,3 @@ class _SquarePainter extends CustomPainter {
         oldDelegate.elements != elements;
   }
 }
-
