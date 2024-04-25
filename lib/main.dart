@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Sistema de validação de caixas',
+      title: 'Sistema de validação de produtos',
       theme: ThemeData(
         brightness: Brightness.dark,
         primaryColor: const Color(0xFF003366),

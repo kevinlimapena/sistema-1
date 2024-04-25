@@ -9,7 +9,7 @@ class MainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sistema de Cadastro de caixas'),
+        title: const Text('Esteira de Produtos'),
       ),
       body: Center(
         child: Column(
