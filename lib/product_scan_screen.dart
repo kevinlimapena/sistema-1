@@ -36,24 +36,7 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.landscapeRight,
-        DeviceOrientation.landscapeLeft,
-      ]);
-    });
     _elementMatches = List.filled(_productElements.elements.length, false);
-  }
-
-  @override
-  void dispose() {
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-      DeviceOrientation.landscapeRight,
-      DeviceOrientation.landscapeLeft,
-    ]);
-    super.dispose();
   }
 
   void _goBack() {
@@ -390,7 +373,7 @@ class _SquarePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()..strokeWidth = 2;
     double elementWidth = size.width / numberOfElements;
-    final textStyle = TextStyle(color: Colors.white, fontSize: 12);
+    const textStyle = TextStyle(color: Colors.white, fontSize: 12);
 
     for (int i = 0; i < numberOfElements; i++) {
       paint.color = elementMatches[i] ? Colors.green : Colors.red;
