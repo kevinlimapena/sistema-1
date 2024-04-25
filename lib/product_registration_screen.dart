@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
+import 'models.dart';
+
 class ProductRegistrationScreen extends StatefulWidget {
   const ProductRegistrationScreen({Key? key}) : super(key: key);
 
@@ -19,6 +21,7 @@ class ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
   String _scannedBarcode = 'Nenhum código escaneado';
   String? _selectedLine = 'Eletrônicos';
   final List<String> _productLines = ['Eletrônicos', 'Elétricos', 'Outros'];
+  List<Product> products = []; // Lista para armazenar os produtos cadastrados
 
   @override
   Widget build(BuildContext context) {
@@ -153,9 +156,9 @@ class ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                       _scannedBarcode != 'Nenhum código escaneado') {
                     setState(() {
                       elements.add(ProductElement(
-                          _elementNameController.text,
-                          _scannedBarcode,
-                          int.parse(_quantityController.text)));
+                          name: _elementNameController.text,
+                          barcode: _scannedBarcode,
+                          quantity: int.parse(_quantityController.text)));
                       _elementNameController.clear();
                       _quantityController.text = '1'; // Reset to default
                       _scannedBarcode = 'Nenhum código escaneado';
@@ -200,12 +203,4 @@ class ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
           barcodeScanRes != '-1' ? barcodeScanRes : 'Nenhum código escaneado';
     });
   }
-}
-
-class ProductElement {
-  final String name;
-  final String barcode;
-  final int quantity;
-
-  ProductElement(this.name, this.barcode, this.quantity);
 }

@@ -5,6 +5,8 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 
+import 'models.dart';
+
 class ProductScanScreen extends StatefulWidget {
   const ProductScanScreen({Key? key}) : super(key: key);
 
@@ -22,13 +24,13 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
   _ProductScanScreenState() : _elementMatches = [];
 
   final Product _productElements = Product(
-    'Caixa',
-    'Fios de Cobre',
-    DateTime.now(),
-    [
-      ProductElement('Cobre', '9780201379624', 10),
-      ProductElement('Borracha', '858974669514', 8),
-      ProductElement('Silicone', '036000291452', 3),
+    name: 'Caixa',
+    line: 'Fios de Cobre',
+    dateTime: DateTime.now(),
+    elements: [
+      ProductElement(name: 'Cobre', barcode: '9780201379624', quantity: 10),
+      ProductElement(name: 'Borracha', barcode: '858974669514', quantity: 8),
+      ProductElement(name: 'Silicone', barcode: '036000291452', quantity: 3),
     ],
   );
 
@@ -251,23 +253,6 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
       ],
     );
   }
-}
-
-class Product {
-  final String name;
-  final String line;
-  final DateTime dateTime;
-  final List<ProductElement> elements;
-
-  Product(this.name, this.line, this.dateTime, this.elements);
-}
-
-class ProductElement {
-  final String name;
-  final String barcode;
-  final int quantity;
-
-  ProductElement(this.name, this.barcode, this.quantity);
 }
 
 class TableCellWidget extends StatelessWidget {
