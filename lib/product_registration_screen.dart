@@ -15,13 +15,11 @@ class ProductRegistrationScreen extends StatefulWidget {
 class ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _lineController = TextEditingController();
   final TextEditingController _elementNameController = TextEditingController();
-  final TextEditingController _quantityController =
-      TextEditingController(text: '1');
+  final TextEditingController _quantityController = TextEditingController(text: '1');
   List<ProductElement> elements = [];
   String _scannedBarcode = 'Nenhum código escaneado';
-  String? _selectedLine = 'Eletrônicos';
-  final List<String> _productLines = ['Eletrônicos', 'Elétricos', 'Outros'];
 
   @override
   Widget build(BuildContext context) {
@@ -53,26 +51,15 @@ class ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: DropdownButtonFormField(
+                    child: TextFormField(
+                      controller: _lineController,
                       decoration: const InputDecoration(
-                        labelText: 'Linha do Produto',
+                        labelText: 'Nome da linha',
                         border: OutlineInputBorder(),
                       ),
-                      value: _selectedLine,
-                      items: _productLines.map((line) {
-                        return DropdownMenuItem(
-                          value: line,
-                          child: Text(line),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _selectedLine = newValue;
-                        });
-                      },
                       validator: (value) {
-                        if (value == null) {
-                          return 'Por favor, selecione uma linha de produtos';
+                        if (value == null || value.isEmpty) {
+                          return 'Por favor, insira a linha do produto';
                         }
                         return null;
                       },
@@ -183,14 +170,14 @@ class ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                 onPressed: () {
                   final product = Product(
                     name: _nameController.text,
-                    line: _selectedLine!,
+                    line: _lineController.text,
                     dateTime: DateTime.now(),
                     elements: List.from(elements),
                   );
                   ProductManager.products.add(product);
                   _nameController.clear();
+                  _lineController.clear();
                   elements.clear();
-                  _selectedLine = _productLines.first;
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                       content: Text('Produto adicionado com sucesso!')));
                   setState(() {});
@@ -204,9 +191,10 @@ class ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
     );
   }
 
+
   Future<void> scanBarcode() async {
     String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-        '#ff6666', 'Cancel', true, ScanMode.BARCODE);
+        '#ff6666', 'Cancel', true, ScanMode.DEFAULT);
     if (!mounted) return;
 
     setState(() {

@@ -48,7 +48,7 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
     } else {
       boxesRead--;
       setState(() {
-        ProductManager.products = [];
+        // ProductManager.products = [];
       });
       // Todos os produtos foram escaneados
       showDialog(
@@ -80,7 +80,7 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
     String barcodeScanRes;
     try {
       barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-          '#ff6666', 'Cancel', true, ScanMode.BARCODE);
+          '#ff6666', 'Cancel', true, ScanMode.DEFAULT);
       _checkBarcodeMatch(barcodeScanRes);
     } on PlatformException {
       barcodeScanRes = 'Failed to get platform version.';
