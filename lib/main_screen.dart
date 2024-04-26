@@ -35,11 +35,11 @@ class _MainScreenState extends State<MainScreen> {
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: Text('Aviso'),
-                      content: Text('Nenhum produto disponível para escanear.'),
+                      title: const Text('Aviso'),
+                      content: const Text('Nenhum produto disponível para escanear.'),
                       actions: <Widget>[
                         TextButton(
-                          child: Text('OK'),
+                          child: const Text('OK'),
                           onPressed: () {
                             Navigator.of(context).pop(); // Fecha o dialog
                           },
