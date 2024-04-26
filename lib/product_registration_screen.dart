@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import 'main_screen.dart';
 
+import 'main_screen.dart';
 import 'models.dart';
 
 class ProductRegistrationScreen extends StatefulWidget {
@@ -144,13 +144,30 @@ class ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                       _scannedBarcode != 'Nenhum código escaneado') {
                     setState(() {
                       elements.add(ProductElement(
-                          name: _elementNameController.text,
-                          barcode: _scannedBarcode,
-                          quantity: int.parse(_quantityController.text)));
+                        name: _elementNameController.text,
+                        barcode: _scannedBarcode,
+                        quantity: int.parse(_quantityController.text),
+                      ));
                       _elementNameController.clear();
                       _quantityController.text = '1'; // Reset to default
                       _scannedBarcode = 'Nenhum código escaneado';
                     });
+                  } else {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text("Código não encontrado"),
+                          content: Text("Registre um código, por favor."),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text("OK"),
+                            ),
+                          ],
+                        );
+                      },
+                    );
                   }
                 },
                 child: const Text('Adicionar Item'),

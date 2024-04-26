@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
+
 import 'product_registration_screen.dart';
 import 'product_scan_screen.dart';
 import 'models.dart';
-
-import 'dart:async';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -35,8 +35,6 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         title: const Text('Esteira de Produtos'),
         actions: [
-          Spacer(),
-          IconButton(onPressed: reload, icon: Icon(Icons.refresh)),
           IconButton(onPressed: delete, icon: Icon(Icons.delete))
         ],
       ),

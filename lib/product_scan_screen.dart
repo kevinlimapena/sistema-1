@@ -41,33 +41,10 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
       _productElements = widget.productList[currentIndex];
       _elementMatches = List.filled(_productElements.elements.length, false);
       setState(() {
-        showCompleteMessage =
-            false; // Reinicia a mensagem para o próximo produto
+        showCompleteMessage = false;
       });
     } else {
-      //boxesRead--;
-      setState(() {
-        // ProductManager.products = [];
-      });
-      // Todos os produtos foram escaneados
-      """"
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text("Completo"),
-            content: const Text("Todos os produtos foram escaneados."),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text("OK"),
-              )
-            ],
-          );
-        },
-      );""""";
+      setState(() {});
     }
   }
 
@@ -98,20 +75,19 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
         break;
       }
     }
-
     if (!found) {
-      if (!navigatorKey.currentState!.mounted) return;
       showDialog(
-        context: navigatorKey.currentState!.context,
+        context: context, // Use o context para mostrar o AlertDialog
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text("Barcode não encontrado"),
-            content: Text(
-                "O barcode: ($scannedBarcode) não pertence a nenhum item."),
+            title: const Text("Código não encontrado"),
+            content:
+                Text("O Código: ($scannedBarcode) não pertence a nenhum item."),
             actions: <Widget>[
               TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text("OK"))
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text("OK"),
+              ),
             ],
           );
         },
@@ -125,117 +101,96 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const Color navyBlue = Color(0xFF003366);
-
-    return MaterialApp(
-      navigatorKey: navigatorKey,
-      title: 'Flutter Prototype',
-      theme: ThemeData(
-        brightness: Brightness.dark,
-        primaryColor: navyBlue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        buttonTheme: ButtonThemeData(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          buttonColor: navyBlue,
-        ),
-        textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.white,
-            backgroundColor: navyBlue,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          ),
-        ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Escanear Produto"),
       ),
-      home: Scaffold(
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        InfoContainerWidget.withText(
-                          'Caixas Fechadas: $boxesRead',
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        InfoContainerWidget.withText(
-                            'Produto: ${_productElements.name}'),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        InfoContainerWidget.withText(
-                            'Linha: ${_productElements.line}'),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        InfoContainerWidget.withText(
-                            'Data e Hora: ${intl.DateFormat('dd/MM/yyyy HH:mm').format(_productElements.dateTime)}'),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  _buildElementTable(_productElements),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        children: [
-                          ElevatedButton(
-                            onPressed: () => scanBarcode(),
-                            child: const Text('Escanear Item',
-                                style: TextStyle(
-                                    fontSize: 16, color: Colors.white)),
-                          ),
-                          const SizedBox(height: 10),
-                          Text('Produto escaneado: $_scanBarcode',
-                              style: const TextStyle(fontSize: 16)),
-                          if (showCompleteMessage)
-                            ElevatedButton(
-                              onPressed: () {
-                                _nextProduct();
-                                boxesRead++;
-                                setState(() {
-                                  _elementMatches = List.filled(
-                                      _productElements.elements.length, false);
-                                  showCompleteMessage = false;
-                                });
-                              },
-                              child: const BlinkingText(
-                                'Fechar Caixa',
-                              ),
-                            ),
-                        ],
+                      InfoContainerWidget.withText(
+                        'Caixas Fechadas: $boxesRead',
                       ),
-                      const SizedBox(width: 20),
-                      Container(
-                        width: MediaQuery.of(context).size.width * 0.17,
-                        height: MediaQuery.of(context).size.width * 0.17,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black),
-                        ),
-                        child: CustomPaint(
-                          painter: _SquarePainter(
-                            numberOfElements: _productElements.elements.length,
-                            elementMatches: _elementMatches,
-                            elements: _productElements.elements,
-                          ),
-                        ),
+                      SizedBox(
+                        width: 10,
                       ),
-                      const SizedBox(width: 20),
+                      InfoContainerWidget.withText(
+                          'Produto: ${_productElements.name}'),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      InfoContainerWidget.withText(
+                          'Linha: ${_productElements.line}'),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      InfoContainerWidget.withText(
+                          'Data e Hora: ${intl.DateFormat('dd/MM/yyyy HH:mm').format(_productElements.dateTime)}'),
                     ],
                   ),
-                  const SizedBox(height: 20),
-                ],
-              ),
+                ),
+                const SizedBox(height: 20),
+                _buildElementTable(_productElements),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Column(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () => scanBarcode(),
+                          child: const Text('Escanear Item',
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.white)),
+                        ),
+                        const SizedBox(height: 10),
+                        Text('Produto escaneado: $_scanBarcode',
+                            style: const TextStyle(fontSize: 16)),
+                        if (showCompleteMessage)
+                          ElevatedButton(
+                            onPressed: () {
+                              _nextProduct();
+                              boxesRead++;
+                              setState(() {
+                                _elementMatches = List.filled(
+                                    _productElements.elements.length, false);
+                                showCompleteMessage = false;
+                              });
+                            },
+                            child: const BlinkingText(
+                              'Fechar Caixa',
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(width: 20),
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.17,
+                      height: MediaQuery.of(context).size.width * 0.17,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black),
+                      ),
+                      child: CustomPaint(
+                        painter: _SquarePainter(
+                          numberOfElements: _productElements.elements.length,
+                          elementMatches: _elementMatches,
+                          elements: _productElements.elements,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 20),
+                  ],
+                ),
+                const SizedBox(height: 20),
+              ],
             ),
           ),
         ),
