@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:sistema/main_screen.dart';
 
 import 'models.dart';
 
@@ -41,10 +42,14 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
       _productElements = widget.productList[currentIndex];
       _elementMatches = List.filled(_productElements.elements.length, false);
       setState(() {
-        showCompleteMessage = false; // Reinicia a mensagem para o próximo produto
+        showCompleteMessage =
+            false; // Reinicia a mensagem para o próximo produto
       });
     } else {
       boxesRead--;
+      setState(() {
+        ProductManager.products = [];
+      });
       // Todos os produtos foram escaneados
       showDialog(
         context: context,

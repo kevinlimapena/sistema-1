@@ -23,15 +23,41 @@ class _MainScreenState extends State<MainScreen> {
           ElevatedButton(
             onPressed: () => Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const ProductRegistrationScreen()),
+              MaterialPageRoute(
+                  builder: (context) => const ProductRegistrationScreen()),
             ),
             child: const Text('Cadastro de Produto'),
           ),
           ElevatedButton(
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => ProductScanScreen(productList: ProductManager.products,)),
-            ),
+            onPressed: () {
+              if (ProductManager.products.isEmpty) {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text('Aviso'),
+                      content: Text('Nenhum produto disponível para escanear.'),
+                      actions: <Widget>[
+                        TextButton(
+                          child: Text('OK'),
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Fecha o dialog
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        ProductScanScreen(productList: ProductManager.products),
+                  ),
+                );
+              }
+            },
             child: const Text('Escanear Produto'),
           ),
           Expanded(
@@ -41,12 +67,12 @@ class _MainScreenState extends State<MainScreen> {
                 final product = ProductManager.products[index];
                 return ListTile(
                   title: Text(product.name),
-                  subtitle: Text('Linha: ${product.line}, Data: ${product.dateTime.toString()}'),
+                  subtitle: Text(
+                      'Linha: ${product.line}, Data: ${product.dateTime.toString()}'),
                 );
               },
             ),
           ),
-
         ],
       ),
     );

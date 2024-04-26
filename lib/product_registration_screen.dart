@@ -179,27 +179,24 @@ class ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                   ),
                 ),
               const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                      final product = Product(
-                        name: _nameController.text,
-                        line: _selectedLine!,
-                        dateTime: DateTime.now(),
-                        elements:
-                            List.from(elements),
-                      );
-                      ProductManager.products.add(product);
-                      _nameController.clear();
-                      elements.clear();
-                      _selectedLine = _productLines.first;
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('Produto adicionado com sucesso!')));
-                      setState(() {
-                      });
-
-                  },
-                  child: const Text('Cadastrar Produto'),
-                ),
+              ElevatedButton(
+                onPressed: () {
+                  final product = Product(
+                    name: _nameController.text,
+                    line: _selectedLine!,
+                    dateTime: DateTime.now(),
+                    elements: List.from(elements),
+                  );
+                  ProductManager.products.add(product);
+                  _nameController.clear();
+                  elements.clear();
+                  _selectedLine = _productLines.first;
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text('Produto adicionado com sucesso!')));
+                  setState(() {});
+                },
+                child: const Text('Cadastrar Produto'),
+              ),
             ],
           ),
         ),
