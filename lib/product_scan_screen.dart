@@ -46,11 +46,12 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
             false; // Reinicia a mensagem para o próximo produto
       });
     } else {
-      boxesRead--;
+      //boxesRead--;
       setState(() {
         // ProductManager.products = [];
       });
       // Todos os produtos foram escaneados
+      """"
       showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -61,19 +62,14 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  Navigator.of(context).pop();
                 },
                 child: const Text("OK"),
               )
             ],
           );
         },
-      );
+      );""""";
     }
-  }
-
-  void _goBack() {
-    Navigator.pop(context);
   }
 
   Future<void> scanBarcode() async {
@@ -100,6 +96,7 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
           !_elementMatches[i]) {
         _elementMatches[i] = true;
         found = true;
+        break;
       }
     }
 
@@ -206,10 +203,6 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
                                 'Fechar Caixa',
                               ),
                             ),
-                          ElevatedButton(
-                            onPressed: _goBack,
-                            child: const Icon(Icons.arrow_back),
-                          ),
                         ],
                       ),
                       const SizedBox(width: 20),
