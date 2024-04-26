@@ -8,7 +8,10 @@ import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'models.dart';
 
 class ProductScanScreen extends StatefulWidget {
-  const ProductScanScreen({Key? key}) : super(key: key);
+  final List<Product> productList; // Lista de produtos
+
+  const ProductScanScreen({Key? key, required this.productList})
+      : super(key: key);
 
   @override
   State<ProductScanScreen> createState() => _ProductScanScreenState();
@@ -19,25 +22,49 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
   List<bool> _elementMatches;
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   int boxesRead = 0;
+  int currentIndex = 0;
   bool showCompleteMessage = false;
 
   _ProductScanScreenState() : _elementMatches = [];
 
-  final Product _productElements = Product(
-    name: 'Caixa',
-    line: 'Fios de Cobre',
-    dateTime: DateTime.now(),
-    elements: [
-      ProductElement(name: 'Cobre', barcode: '9780201379624', quantity: 10),
-      ProductElement(name: 'Borracha', barcode: '858974669514', quantity: 8),
-      ProductElement(name: 'Silicone', barcode: '036000291452', quantity: 3),
-    ],
-  );
+  late Product _productElements = widget.productList.first;
 
   @override
   void initState() {
     super.initState();
     _elementMatches = List.filled(_productElements.elements.length, false);
+  }
+
+  void _nextProduct() {
+    if (currentIndex < widget.productList.length - 1) {
+      currentIndex++;
+      _productElements = widget.productList[currentIndex];
+      _elementMatches = List.filled(_productElements.elements.length, false);
+      setState(() {
+        showCompleteMessage = false; // Reinicia a mensagem para o próximo produto
+      });
+    } else {
+      boxesRead--;
+      // Todos os produtos foram escaneados
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Completo"),
+            content: const Text("Todos os produtos foram escaneados."),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                },
+                child: const Text("OK"),
+              )
+            ],
+          );
+        },
+      );
+    }
   }
 
   void _goBack() {
@@ -49,7 +76,6 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
     try {
       barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
           '#ff6666', 'Cancel', true, ScanMode.BARCODE);
-      print("BARCODE: ($barcodeScanRes)");
       _checkBarcodeMatch(barcodeScanRes);
     } on PlatformException {
       barcodeScanRes = 'Failed to get platform version.';
@@ -163,6 +189,7 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
                           if (showCompleteMessage)
                             ElevatedButton(
                               onPressed: () {
+                                _nextProduct();
                                 boxesRead++;
                                 setState(() {
                                   _elementMatches = List.filled(

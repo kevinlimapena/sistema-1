@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'main_screen.dart';
 
 import 'models.dart';
 
@@ -21,7 +22,6 @@ class ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
   String _scannedBarcode = 'Nenhum código escaneado';
   String? _selectedLine = 'Eletrônicos';
   final List<String> _productLines = ['Eletrônicos', 'Elétricos', 'Outros'];
-  List<Product> products = []; // Lista para armazenar os produtos cadastrados
 
   @override
   Widget build(BuildContext context) {
@@ -179,12 +179,26 @@ class ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                   ),
                 ),
               const SizedBox(height: 20),
-              if (elements.isNotEmpty)
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pop(context);
+                      final product = Product(
+                        name: _nameController.text,
+                        line: _selectedLine!,
+                        dateTime: DateTime.now(),
+                        elements:
+                            List.from(elements),
+                      );
+                      ProductManager.products.add(product);
+                      _nameController.clear();
+                      elements.clear();
+                      _selectedLine = _productLines.first;
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text('Produto adicionado com sucesso!')));
+                      setState(() {
+                      });
+
                   },
-                  child: const Text('Finalizar Cadastro'),
+                  child: const Text('Cadastrar Produto'),
                 ),
             ],
           ),
