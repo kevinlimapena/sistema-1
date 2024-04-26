@@ -17,7 +17,8 @@ class ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _lineController = TextEditingController();
   final TextEditingController _elementNameController = TextEditingController();
-  final TextEditingController _quantityController = TextEditingController(text: '1');
+  final TextEditingController _quantityController =
+      TextEditingController(text: '1');
   List<ProductElement> elements = [];
   String _scannedBarcode = 'Nenhum código escaneado';
 
@@ -180,7 +181,9 @@ class ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
                   elements.clear();
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                       content: Text('Produto adicionado com sucesso!')));
-                  setState(() {});
+                  setState(() {
+                    Navigator.of(context).pop();
+                  });
                 },
                 child: const Text('Cadastrar Produto'),
               ),
@@ -190,7 +193,6 @@ class ProductRegistrationScreenState extends State<ProductRegistrationScreen> {
       ),
     );
   }
-
 
   Future<void> scanBarcode() async {
     String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(

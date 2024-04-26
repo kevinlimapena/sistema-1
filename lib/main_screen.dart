@@ -3,6 +3,8 @@ import 'product_registration_screen.dart';
 import 'product_scan_screen.dart';
 import 'models.dart';
 
+import 'dart:async';
+
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
 
@@ -11,11 +13,32 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  late Timer timer;
+
+  @override
+  void initState() {
+    super.initState();
+    timer = Timer.periodic(Duration(seconds: 3), (timer) {
+      reload();
+    });
+  }
+
+  void reload() => setState(() {});
+
+  void delete() => setState(() {
+        ProductManager.products = [];
+      });
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Esteira de Produtos'),
+        actions: [
+          Spacer(),
+          IconButton(onPressed: reload, icon: Icon(Icons.refresh)),
+          IconButton(onPressed: delete, icon: Icon(Icons.delete))
+        ],
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -36,7 +59,8 @@ class _MainScreenState extends State<MainScreen> {
                   builder: (BuildContext context) {
                     return AlertDialog(
                       title: const Text('Aviso'),
-                      content: const Text('Nenhum produto disponível para escanear.'),
+                      content: const Text(
+                          'Nenhum produto disponível para escanear.'),
                       actions: <Widget>[
                         TextButton(
                           child: const Text('OK'),
@@ -60,15 +84,18 @@ class _MainScreenState extends State<MainScreen> {
             },
             child: const Text('Escanear Produto'),
           ),
+          Text("Produtos cadastrados:"),
           Expanded(
             child: ListView.builder(
               itemCount: ProductManager.products.length,
               itemBuilder: (context, index) {
                 final product = ProductManager.products[index];
-                return ListTile(
-                  title: Text(product.name),
-                  subtitle: Text(
-                      'Linha: ${product.line}, Data: ${product.dateTime.toString()}'),
+                return Card(
+                  child: ListTile(
+                    title: Text(product.name),
+                    subtitle: Text(
+                        'Linha: ${product.line}, Data: ${product.dateTime.toString()}'),
+                  ),
                 );
               },
             ),

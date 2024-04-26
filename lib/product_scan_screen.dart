@@ -4,12 +4,11 @@ import 'dart:ui' as ui;
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import 'package:sistema/main_screen.dart';
 
 import 'models.dart';
 
 class ProductScanScreen extends StatefulWidget {
-  final List<Product> productList; // Lista de produtos
+  final List<Product> productList;
 
   const ProductScanScreen({Key? key, required this.productList})
       : super(key: key);
@@ -155,21 +154,32 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
             padding: const EdgeInsets.all(10.0),
             child: SingleChildScrollView(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      InfoContainerWidget.withText(
-                        'Caixas Fechadas: $boxesRead',
-                      ),
-                      InfoContainerWidget.withText(
-                          'Produto: ${_productElements.name}'),
-                      InfoContainerWidget.withText(
-                          'Linha: ${_productElements.line}'),
-                      InfoContainerWidget.withText(
-                          'Data e Hora: ${intl.DateFormat('dd/MM/yyyy HH:mm').format(_productElements.dateTime)}'),
-                    ],
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        InfoContainerWidget.withText(
+                          'Caixas Fechadas: $boxesRead',
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        InfoContainerWidget.withText(
+                            'Produto: ${_productElements.name}'),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        InfoContainerWidget.withText(
+                            'Linha: ${_productElements.line}'),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        InfoContainerWidget.withText(
+                            'Data e Hora: ${intl.DateFormat('dd/MM/yyyy HH:mm').format(_productElements.dateTime)}'),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 20),
                   _buildElementTable(_productElements),
@@ -388,11 +398,10 @@ class _SquarePainter extends CustomPainter {
           Rect.fromLTWH(i * elementWidth, 0, elementWidth, size.height);
       canvas.drawRect(rect, paint);
 
-      // Criar TextPainter para cada iteração para garantir que textDirection seja definido
       final textPainter = TextPainter(
         text: TextSpan(text: elements[i].name, style: textStyle),
         textAlign: TextAlign.center,
-        textDirection: ui.TextDirection.ltr, // Definido diretamente aqui
+        textDirection: ui.TextDirection.ltr,
         textScaler: TextScaler.noScaling,
       );
 
