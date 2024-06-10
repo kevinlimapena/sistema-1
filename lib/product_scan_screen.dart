@@ -127,13 +127,9 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
                       SizedBox(
                         width: 10,
                       ),
-                      InfoContainerWidget.withText(
-                          'Linha: ${_productElements.line}'),
                       SizedBox(
                         width: 10,
                       ),
-                      InfoContainerWidget.withText(
-                          'Data e Hora: ${intl.DateFormat('dd/MM/yyyy HH:mm').format(_productElements.dateTime)}'),
                     ],
                   ),
                 ),

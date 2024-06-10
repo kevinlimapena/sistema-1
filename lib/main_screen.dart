@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-import 'product_registration_screen.dart';
 import 'product_scan_screen.dart';
 import 'models.dart';
 
@@ -19,15 +20,144 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     timer = Timer.periodic(Duration(seconds: 3), (timer) {
-      reload();
+      if (mounted) {
+        reload();
+      } else {
+        timer.cancel();
+      }
     });
+  }
+
+  @override
+  void dispose() {
+    timer.cancel();
+    super.dispose();
   }
 
   void reload() => setState(() {});
 
   void delete() => setState(() {
-        ProductManager.products = [];
-      });
+    ProductManager.products = [];
+  });
+
+  Future<void> _fetchProductData(String productCode) async {
+    String url = 'http://yamadalomfabricacao123875.protheus.cloudtotvs.com.br:4050/rest/IPENA/IP_ESTRUTURA?CodPA=$productCode';
+    String username = 'IPENA';
+    String password = 'Nina@2010';
+    String basicAuth = 'Basic ' + base64Encode(utf8.encode('$username:$password'));
+
+    print('Requesting product data for code: $productCode');
+    print('URL: $url');
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Center(
+          child: CircularProgressIndicator(),
+        );
+      },
+    );
+
+    try {
+      var response = await http.get(
+        Uri.parse(url),
+        headers: {'Authorization': basicAuth},
+      );
+
+      Navigator.of(context).pop(); // Fechar o diálogo de carregamento
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        setState(() {
+          ProductManager.products.add(Product.fromJson(data));
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  ProductScanScreen(productList: ProductManager.products),
+            ),
+          );
+        });
+      } else {
+        _showErrorDialog('Failed to fetch product data: ${response.statusCode}');
+      }
+    } on TimeoutException catch (e) {
+      Navigator.of(context).pop();
+      _showErrorDialog('Connection timed out. Please try again later.');
+      print('Error: $e');
+    } catch (e) {
+      Navigator.of(context).pop();
+      _showErrorDialog('An error occurred: $e');
+      print('Error: $e');
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showCodeInputDialog() {
+    TextEditingController _codeController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Enter Product Code'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _codeController,
+                  decoration: const InputDecoration(
+                    labelText: 'Product Code',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Submit'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                print('Submitting code: ${_codeController.text}');
+                await _fetchProductData(_codeController.text);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,67 +168,33 @@ class _MainScreenState extends State<MainScreen> {
           IconButton(onPressed: delete, icon: Icon(Icons.delete))
         ],
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          ElevatedButton(
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const ProductRegistrationScreen()),
-            ),
-            child: const Text('Cadastro de Produto'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              if (ProductManager.products.isEmpty) {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text('Aviso'),
-                      content: const Text(
-                          'Nenhum produto disponível para escanear.'),
-                      actions: <Widget>[
-                        TextButton(
-                          child: const Text('OK'),
-                          onPressed: () {
-                            Navigator.of(context).pop(); // Fecha o dialog
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
-              } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        ProductScanScreen(productList: ProductManager.products),
-                  ),
-                );
-              }
-            },
-            child: const Text('Escanear Produto'),
-          ),
-          Text("Produtos cadastrados:"),
-          Expanded(
-            child: ListView.builder(
-              itemCount: ProductManager.products.length,
-              itemBuilder: (context, index) {
-                final product = ProductManager.products[index];
-                return Card(
-                  child: ListTile(
-                    title: Text(product.name),
-                    subtitle: Text(
-                        'Linha: ${product.line}, Data: ${product.dateTime.toString()}'),
-                  ),
-                );
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            ElevatedButton(
+              onPressed: () {
+                if (ProductManager.products.isEmpty) {
+                  _showCodeInputDialog();
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          ProductScanScreen(productList: ProductManager.products),
+                    ),
+                  );
+                }
               },
+              child: const Text('Escanear Produto'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: Size(double.infinity, 35),
+                textStyle: TextStyle(fontSize: 20),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

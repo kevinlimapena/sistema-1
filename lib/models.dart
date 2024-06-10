@@ -1,30 +1,49 @@
 class Product {
+  final String id;
   final String name;
-  final String line;
-  final DateTime dateTime;
   final List<ProductElement> elements;
   bool closed;
 
   Product({
+    required this.id,
     required this.name,
-    required this.line,
-    required this.dateTime,
     required this.elements,
     this.closed = false,
   });
+
+  factory Product.fromJson(Map<String, dynamic> json) {
+    var elementsFromJson = json['Dados'] as List;
+    List<ProductElement> elementsList = elementsFromJson.map((elementJson) => ProductElement.fromJson(elementJson)).toList();
+
+    return Product(
+      id: elementsFromJson[0]['Produto PA'],
+      name: elementsFromJson[0]['Descricao PA'],
+      elements: elementsList,
+    );
+  }
 }
 
 class ProductElement {
+  final String id;
   final String name;
   final String barcode;
-  final int quantity;
+  final double quantity;
   bool checked;
 
   ProductElement({
+    required this.id,
     required this.name,
     required this.barcode,
     required this.quantity,
     this.checked = false,
   });
-}
 
+  factory ProductElement.fromJson(Map<String, dynamic> json) {
+    return ProductElement(
+      id: json['Componente'],
+      name: json['Descricao Componente'],
+      barcode: json['Codigo Barras'],
+      quantity: json['qtd Comp'].toDouble(),
+    );
+  }
+}
