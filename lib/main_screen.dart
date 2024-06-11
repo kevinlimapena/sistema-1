@@ -124,7 +124,7 @@ class _MainScreenState extends State<MainScreen> {
         return Transform.translate(
           offset: Offset(-90, 0),
           child: AlertDialog(
-            title: const Text('Enter Product Code'),
+            title: const Text('Digite o código do PA'),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -133,7 +133,7 @@ class _MainScreenState extends State<MainScreen> {
                     controller: _codeController,
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
-                      labelText: 'Product Code',
+                      labelText: 'Código PA',
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -142,13 +142,13 @@ class _MainScreenState extends State<MainScreen> {
             ),
             actions: <Widget>[
               TextButton(
-                child: const Text('Cancel'),
+                child: const Text('Cancelar'),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
               ),
               ElevatedButton(
-                child: const Text('Submit'),
+                child: const Text('Entrar'),
                 onPressed: () async {
                   Navigator.of(context).pop();
                   print('Submitting code: ${_codeController.text}');
@@ -190,7 +190,7 @@ class _MainScreenState extends State<MainScreen> {
                   );
                 }
               },
-              child: const Text('Escanear Produto'),
+              child: const Text('Entre Produto'),
               style: ElevatedButton.styleFrom(
                 minimumSize: Size(double.infinity, 35),
                 textStyle: TextStyle(fontSize: 20),

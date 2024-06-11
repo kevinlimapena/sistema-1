@@ -18,7 +18,7 @@ class ProductScanScreen extends StatefulWidget {
 }
 
 class _ProductScanScreenState extends State<ProductScanScreen> {
-  String _scanBarcode = 'Unknown';
+  String _scanBarcode = 'ZERO';
   List<bool> _elementMatches;
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   int boxesRead = 0;
@@ -104,6 +104,31 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Escanear Produto"),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(2.0),
+            child: Center(
+              child: Column(
+                children: [
+                  Text(
+                    '${intl.DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now())}',
+                    style: TextStyle(fontSize: 15),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(2.0),
+                    child: Center(
+                      child: Text(
+                        "Usuário: IPENA",
+                        style: TextStyle(fontSize: 15),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+        ],
       ),
       body: SafeArea(
         child: Padding(
@@ -133,9 +158,9 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 _buildElementTable(_productElements),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -167,10 +192,10 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
                           ),
                       ],
                     ),
-                    const SizedBox(width: 20),
+                    const SizedBox(width: 10),
                     Container(
-                      width: MediaQuery.of(context).size.width * 0.17,
-                      height: MediaQuery.of(context).size.width * 0.17,
+                      width: MediaQuery.of(context).size.width * 0.30,
+                      height: MediaQuery.of(context).size.width * 0.30,
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.black),
                       ),
@@ -207,8 +232,8 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
         const TableRow(
           decoration: BoxDecoration(color: Colors.black),
           children: [
-            TableCellWidget.withText('Nome'),
-            TableCellWidget.withText('Código'),
+            TableCellWidget.withText('Item'),
+            TableCellWidget.withText('Código Barras'),
             TableCellWidget.withText('Quantidade'),
             TableCellWidget.withText('Escaneado'),
           ],
