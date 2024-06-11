@@ -90,8 +90,7 @@ class _MainScreenState extends State<MainScreen> {
       _showErrorDialog('Connection timed out. Please try again later.');
       print('Error: $e');
     } catch (e) {
-      Navigator.of(context).pop();
-      _showErrorDialog('An error occurred: $e');
+      _showErrorDialog('O código que você digitou não existe');
       print('Error: $e');
     }
   }
@@ -122,38 +121,42 @@ class _MainScreenState extends State<MainScreen> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('Enter Product Code'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: _codeController,
-                  decoration: const InputDecoration(
-                    labelText: 'Product Code',
-                    border: OutlineInputBorder(),
+        return Transform.translate(
+          offset: Offset(-90, 0),
+          child: AlertDialog(
+            title: const Text('Enter Product Code'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: _codeController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Product Code',
+                      border: OutlineInputBorder(),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              ElevatedButton(
+                child: const Text('Submit'),
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  print('Submitting code: ${_codeController.text}');
+                  await _fetchProductData(_codeController.text);
+                },
+              ),
+            ],
           ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              child: const Text('Submit'),
-              onPressed: () async {
-                Navigator.of(context).pop();
-                print('Submitting code: ${_codeController.text}');
-                await _fetchProductData(_codeController.text);
-              },
-            ),
-          ],
         );
       },
     );
