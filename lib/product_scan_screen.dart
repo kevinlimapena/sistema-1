@@ -68,8 +68,8 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
   void _checkBarcodeMatch(String scannedBarcode) {
     bool found = false;
     for (int i = 0; i < _productElements.elements.length; i++) {
-      if (_productElements.elements[i].barcode == scannedBarcode &&
-          !_elementMatches[i]) {
+      _productElements.elements[i].qtdLida++;
+      if (_productElements.elements[i].barcode == scannedBarcode) {
         _elementMatches[i] = true;
         found = true;
         break;
@@ -77,7 +77,7 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
     }
     if (!found) {
       showDialog(
-        context: context, // Use o context para mostrar o AlertDialog
+        context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             title: const Text("Código não encontrado"),
@@ -97,6 +97,53 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
         showCompleteMessage = true;
       });
     }
+  }
+
+  void _showCodeInputDialog() {
+    TextEditingController _codeController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Transform.translate(
+          offset: Offset(-90, 0),
+          child: AlertDialog(
+            title: const Text('Digite o Componente'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: _codeController,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Componente',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Cancelar'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              ElevatedButton(
+                child: const Text('OK'),
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  print('Submitting code: ${_codeController.text}');
+                  _checkBarcodeMatch(_codeController.text);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -127,12 +174,11 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
               ),
             ),
           ),
-
         ],
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(10.0),
+          padding: const EdgeInsets.all(6.0),
           child: SingleChildScrollView(
             child: Column(
               children: [
@@ -152,6 +198,13 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
                       SizedBox(
                         width: 10,
                       ),
+                      InfoContainerWidget.withText(
+                          'OP: ${_productElements.ordemProducao}'),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      InfoContainerWidget.withText(
+                          'Qtd Emb: ${_productElements.qtdEmbala}'),
                       SizedBox(
                         width: 10,
                       ),
@@ -160,17 +213,26 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
                 ),
                 const SizedBox(height: 10),
                 _buildElementTable(_productElements),
-                const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Column(
                       children: [
-                        ElevatedButton(
-                          onPressed: () => scanBarcode(),
-                          child: const Text('Escanear Item',
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.white)),
+                        Row(
+                          children: [
+                            ElevatedButton(
+                              onPressed: () => scanBarcode(),
+                              child: const Text('Escanear Item',
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.white)),
+                            ),
+                            ElevatedButton(
+                              onPressed: () => _showCodeInputDialog(),
+                              child: const Text('Digitar Item',
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.white)),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 10),
                         Text('Produto escaneado: $_scanBarcode',
@@ -181,6 +243,9 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
                               _nextProduct();
                               boxesRead++;
                               setState(() {
+                                for (var element in _productElements.elements) {
+                                  element.qtdLida = 0;
+                                }
                                 _elementMatches = List.filled(
                                     _productElements.elements.length, false);
                                 showCompleteMessage = false;
@@ -193,24 +258,23 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
                       ],
                     ),
                     const SizedBox(width: 10),
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.30,
-                      height: MediaQuery.of(context).size.width * 0.30,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black),
-                      ),
-                      child: CustomPaint(
-                        painter: _SquarePainter(
-                          numberOfElements: _productElements.elements.length,
-                          elementMatches: _elementMatches,
-                          elements: _productElements.elements,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 20),
                   ],
                 ),
-                const SizedBox(height: 20),
+                Container(
+                  width: MediaQuery.of(context).size.width * 1,
+                  height: MediaQuery.of(context).size.width * 0.30,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black),
+                  ),
+                  child: CustomPaint(
+                    painter: _SquarePainter(
+                      numberOfElements: _productElements.elements.length,
+                      elementMatches: _elementMatches,
+                      elements: _productElements.elements,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 20),
               ],
             ),
           ),
@@ -222,10 +286,12 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
   Widget _buildElementTable(Product product) {
     return Table(
       columnWidths: const {
-        0: FlexColumnWidth(1),
-        1: FlexColumnWidth(1),
+        0: FlexColumnWidth(3.65),
+        1: FlexColumnWidth(1.5),
         2: FlexColumnWidth(1),
-        3: FlexColumnWidth(1), // Espaço para a coluna de checklist
+        3: FlexColumnWidth(1),
+        4: FlexColumnWidth(1),
+        5: FlexColumnWidth(1),
       },
       border: TableBorder.all(),
       children: [
@@ -235,7 +301,9 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
             TableCellWidget.withText('Item'),
             TableCellWidget.withText('Código Barras'),
             TableCellWidget.withText('Quantidade'),
-            TableCellWidget.withText('Escaneado'),
+            TableCellWidget.withText('Total'),
+            TableCellWidget.withText('Qtd Lida'),
+            TableCellWidget.withText('Lido'),
           ],
         ),
         ...product.elements.map((element) {
@@ -245,8 +313,10 @@ class _ProductScanScreenState extends State<ProductScanScreen> {
               TableCellWidget.withText(element.name),
               TableCellWidget.withText(element.barcode),
               TableCellWidget.withText(element.quantity.toString()),
+              TableCellWidget.withText(element.totalComponente.toString()),
+              TableCellWidget.withText(element.qtdLida.toString()),
               Container(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(6.0),
                 decoration: BoxDecoration(
                   color: const Color(0xFF003366).withOpacity(0.6),
                   borderRadius: BorderRadius.circular(8),
@@ -282,8 +352,8 @@ class TableCellWidget extends StatelessWidget {
         ),
         child: Text(
           text,
-          style:
-              const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
         ),
       ),
     );
@@ -307,7 +377,7 @@ class InfoContainerWidget extends StatelessWidget {
       child: Text(
         text,
         style: const TextStyle(
-            fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+            fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
       ),
     );
   }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:flutter/services.dart';
 
 import 'product_scan_screen.dart';
 import 'models.dart';
@@ -37,14 +39,32 @@ class _MainScreenState extends State<MainScreen> {
   void reload() => setState(() {});
 
   void delete() => setState(() {
-    ProductManager.products = [];
-  });
+        ProductManager.products = [];
+      });
+
+  Future<void> scanBarcode() async {
+    String barcodeScanRes;
+    try {
+      barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
+          '#ff6666', 'Cancel', true, ScanMode.DEFAULT);
+      _fetchProductData(barcodeScanRes);
+    } on PlatformException {
+      barcodeScanRes = 'Failed to get platform version.';
+    }
+
+    if (!mounted) return;
+
+    setState(() {});
+  }
 
   Future<void> _fetchProductData(String productCode) async {
-    String url = 'http://yamadalomfabricacao123875.protheus.cloudtotvs.com.br:4050/rest/IPENA/IP_ESTRUTURA?CodPA=$productCode';
+    //String url = 'http://yamadalomfabricacao123875.protheus.cloudtotvs.com.br:4050/rest/IPENA/IP_ESTRUTURA?CodPA=$productCode';
+    String url =
+        'http://yamadalomfabricacao123875.protheus.cloudtotvs.com.br:4050/rest/IPENA/IP_ESTRUTURA?NUMOP=$productCode';
     String username = 'IPENA';
     String password = 'Nina@2010';
-    String basicAuth = 'Basic ' + base64Encode(utf8.encode('$username:$password'));
+    String basicAuth =
+        'Basic ' + base64Encode(utf8.encode('$username:$password'));
 
     print('Requesting product data for code: $productCode');
     print('URL: $url');
@@ -65,7 +85,7 @@ class _MainScreenState extends State<MainScreen> {
         headers: {'Authorization': basicAuth},
       );
 
-      Navigator.of(context).pop(); // Fechar o diálogo de carregamento
+      Navigator.of(context).pop();
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
@@ -83,14 +103,10 @@ class _MainScreenState extends State<MainScreen> {
           );
         });
       } else {
-        _showErrorDialog('Failed to fetch product data: ${response.statusCode}');
+        _showErrorDialog('A requisição falhou \n\n${response.statusCode}');
       }
-    } on TimeoutException catch (e) {
-      Navigator.of(context).pop();
-      _showErrorDialog('Connection timed out. Please try again later.');
-      print('Error: $e');
     } catch (e) {
-      _showErrorDialog('O código que você digitou não existe');
+      _showErrorDialog('O código que você digitou não existe \n\n$e');
       print('Error: $e');
     }
   }
@@ -167,9 +183,7 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Esteira de Produtos'),
-        actions: [
-          IconButton(onPressed: delete, icon: Icon(Icons.delete))
-        ],
+        actions: [IconButton(onPressed: delete, icon: Icon(Icons.delete))],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -184,13 +198,33 @@ class _MainScreenState extends State<MainScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          ProductScanScreen(productList: ProductManager.products),
+                      builder: (context) => ProductScanScreen(
+                          productList: ProductManager.products),
                     ),
                   );
                 }
               },
-              child: const Text('Entre Produto'),
+              child: const Text('Digite Produto'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: Size(double.infinity, 35),
+                textStyle: TextStyle(fontSize: 20),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (ProductManager.products.isEmpty) {
+                  scanBarcode();
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProductScanScreen(
+                          productList: ProductManager.products),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Escanear Produto'),
               style: ElevatedButton.styleFrom(
                 minimumSize: Size(double.infinity, 35),
                 textStyle: TextStyle(fontSize: 20),
